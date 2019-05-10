@@ -2,7 +2,7 @@ namespace BGE.Engine.Game
 {
 	public interface IGame
 	{
-		string StartGame();
+		GameState StartGame();
 		string Shoot();
 		string GameStats();
 	}

@@ -11,26 +11,37 @@ namespace BGE.Engine.Game
 			_random = new Random();
 		}
 		
-		public string StartGame()
+		public GameState StartGame()
 		{
-			var field = GenerateRandomField();
-			return "a";
+			var gameState = new GameState
+			{
+				FirstPlayer = GenerateRandomField(),
+				SecondPlayer = GenerateRandomField()
+			};
+			
+			return gameState;
 		}
 
-		private bool[,] GenerateRandomField()
+		private char[,] GenerateRandomField()
 		{
-			var field = new bool[8, 8];
+			var field = new char[8, 8];
+
+			for (var i = 0; i < 8; i++)
+			{
+				for (var j = 0; j < 8; j++)
+				{
+					field[i, j] = ' ';
+				}
+			}
 			
 			Generate(field, 2);
 			Generate(field, 3);
-			Generate(field, 3);
 			Generate(field, 4);
-			Generate(field, 5);
 			
 			return field;
 		}
 
-		private void Generate(bool[,] field, int ship)
+		private void Generate(char[,] field, int ship)
 		{
 			while (true)
 			{
@@ -46,13 +57,13 @@ namespace BGE.Engine.Game
 
 				if (isVertical)
 				{
-					var overlap = Enumerable.Range(y, ship).Select(r => field[x, r]).Any(r => r);
+					var overlap = Enumerable.Range(y, ship).Select(r => field[x, r] != ' ').Any(r => r);
 					if(overlap)
 						continue;
 				}
 				else
 				{
-					var overlap = Enumerable.Range(x, ship).Select(r => field[r, y]).Any(r => r);
+					var overlap = Enumerable.Range(x, ship).Select(r => field[r, y] != ' ').Any(r => r);
 					if(overlap)
 						continue;
 				}
@@ -60,9 +71,9 @@ namespace BGE.Engine.Game
 				for (var i = 0; i < ship; i++)
 				{
 					if (isVertical)
-						field[x, y + i] = true;
+						field[x, y + i] = '0';
 					else
-						field[x + i, y] = true;
+						field[x + i, y] = '0';
 				}
 				break;
 			}

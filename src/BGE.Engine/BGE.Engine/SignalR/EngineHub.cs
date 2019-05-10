@@ -1,16 +1,10 @@
 using System;
 using System.Threading.Tasks;
+using BGE.Engine.Game;
 using Microsoft.AspNetCore.SignalR;
 
 namespace BGE.Engine.SignalR
 {
-	public class GameStats
-	{
-		public bool[,] PlayerField { get; set; }
-		public bool[,] NewField { get; set; }
-		public int Num { get; set; }
-	}
-
 	public class Shot
 	{
 		public int X { get; set; }
@@ -18,50 +12,27 @@ namespace BGE.Engine.SignalR
 		public string Player { get; set; }
 	}
 	
-	public class EngineHub : Hub<IEngineClient>
+	public class EngineHub : Hub
 	{
-		[HubMethodName("StartGame")]
-		public Task<GameStats> Start()
-		{
-			var s = new GameStats
-			{
-				Num = 1,
-				NewField = new[,]
-				{
-					{
-						true, true
-					},
-					{
-						false, false
-					}
-				},
-				PlayerField = new[,]
-				{
-					{
-						true, true
-					},
-					{
-						false, false
-					}
-				}
-			};
-			return Task.FromResult(s);
-		}
-
+		private readonly IGame _game;
 		
+		public EngineHub(IGame game)
+		{
+			_game = game;
+		}
+		
+		[HubMethodName("StartGame")]
+		public Task<GameState> StartGame()
+		{
+			var gameState = _game.StartGame();
+			return Task.FromResult(gameState);
+		}
 		
 		[HubMethodName("Shoot")]
 		public Task<string> Shoot(Shot state)
 		{
 			Console.WriteLine("Hello");
 			return Task.FromResult("ok");
-		}
-		
-		[HubMethodName("Send")]
-		public Task<string> DirectMessage(string state)
-		{
-			Console.WriteLine("Hello");
-			return Task.FromResult(state);
 		}
 	}
 }

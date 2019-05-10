@@ -1,7 +1,7 @@
 import { Body, Controller, HttpCode, Inject, Post } from '@nestjs/common';
 import { HubConnection, HubConnectionState } from '@aspnet/signalr';
 import { ok, error } from '../util/response';
-import { ShootDto } from './shoot.dto';
+import { ShootDto } from './dto/shoot.dto';
 
 @Controller('api')
 export class ApiController {
