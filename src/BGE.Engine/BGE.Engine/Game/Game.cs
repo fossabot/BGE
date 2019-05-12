@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using BGE.Engine.SignalR;
 
 namespace BGE.Engine.Game
 {
@@ -11,24 +12,28 @@ namespace BGE.Engine.Game
 			_random = new Random();
 		}
 		
-		public GameState StartGame()
+		public GameState StartGame(int rows = 8, int cols = 8)
 		{
+			var playerState = new PlayerState
+			{
+				Field = GenerateRandomField(rows, cols)
+			};
+
 			var gameState = new GameState
 			{
-				FirstPlayer = GenerateRandomField(),
-				SecondPlayer = GenerateRandomField()
+				PlayerState = playerState
 			};
 			
 			return gameState;
 		}
 
-		private char[,] GenerateRandomField()
+		private char[,] GenerateRandomField(int rows, int cols)
 		{
-			var field = new char[8, 8];
+			var field = new char[rows, cols];
 
-			for (var i = 0; i < 8; i++)
+			for (var i = 0; i < rows; i++)
 			{
-				for (var j = 0; j < 8; j++)
+				for (var j = 0; j < cols; j++)
 				{
 					field[i, j] = ' ';
 				}
@@ -43,27 +48,33 @@ namespace BGE.Engine.Game
 
 		private void Generate(char[,] field, int ship)
 		{
+			var rows = field.GetUpperBound(0) + 1;
+			var cols = field.GetUpperBound(1) + 1;
 			while (true)
 			{
-				var x = _random.Next(0, 8);
-				var y = _random.Next(0, 8);
+				var x = _random.Next(0, rows);
+				var y = _random.Next(0, cols);
 				var isVertical = _random.Next(0, 2) == 1;
 				
-				if(isVertical && y > 8 - ship)
+				if(isVertical && y > cols - ship)
 					continue;
 				
-				if(!isVertical && x > 8 - ship)
+				if(!isVertical && x > rows - ship)
 					continue;
 
 				if (isVertical)
 				{
-					var overlap = Enumerable.Range(y, ship).Select(r => field[x, r] != ' ').Any(r => r);
+					var overlap = Enumerable.Range(y, ship)
+						.Select(r => field[x, r] != ' ').Any(r => r);
+					
 					if(overlap)
 						continue;
 				}
 				else
 				{
-					var overlap = Enumerable.Range(x, ship).Select(r => field[r, y] != ' ').Any(r => r);
+					var overlap = Enumerable.Range(x, ship)
+						.Select(r => field[r, y] != ' ').Any(r => r);
+					
 					if(overlap)
 						continue;
 				}
@@ -79,10 +90,10 @@ namespace BGE.Engine.Game
 			}
 		}
 
-		public string Shoot()
+		public GameState Shoot(ShootRequest shootRequest, GameState gameState)
 		{
-			
-			throw new NotImplementedException();
+			gameState.PlayerState.Field[shootRequest.X - 1, shootRequest.Y - 1] = 'X';
+			return gameState;
 		}
 
 		public string GameStats()

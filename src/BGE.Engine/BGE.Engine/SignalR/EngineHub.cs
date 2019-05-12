@@ -1,17 +1,11 @@
-using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using BGE.Engine.Game;
+using FluentValidation;
 using Microsoft.AspNetCore.SignalR;
 
 namespace BGE.Engine.SignalR
 {
-	public class Shot
-	{
-		public int X { get; set; }
-		public int Y { get; set; }
-		public string Player { get; set; }
-	}
-	
 	public class EngineHub : Hub
 	{
 		private readonly IGame _game;
@@ -22,17 +16,25 @@ namespace BGE.Engine.SignalR
 		}
 		
 		[HubMethodName("StartGame")]
-		public Task<GameState> StartGame()
+		public async Task<GameState> StartGame(StartRequest startRequest)
 		{
-			var gameState = _game.StartGame();
-			return Task.FromResult(gameState);
+			var validator = new StartRequestValidator();
+			await validator.ValidateAndThrowAsync(startRequest);
+			return _game.StartGame(startRequest.Rows, startRequest.Cols);
 		}
 		
 		[HubMethodName("Shoot")]
-		public Task<string> Shoot(Shot state)
+		public async Task<GameState> Shoot(ShootRequest shootRequest, GameState gameState)
 		{
-			Console.WriteLine("Hello");
-			return Task.FromResult("ok");
+			var context = new ValidationContext<ShootRequest>(shootRequest);
+			context.RootContextData.Add(new KeyValuePair<string, object>("gameState", gameState));
+			var validator = new ShootRequestValidator();
+			var result = await validator.ValidateAsync(context);
+			
+			if(!result.IsValid)
+				throw new ValidationException(result.Errors);
+			
+			return _game.Shoot(shootRequest, gameState);
 		}
 	}
 }
