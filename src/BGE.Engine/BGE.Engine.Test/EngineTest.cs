@@ -51,7 +51,7 @@ namespace BGE.Engine.Test
 		}
 		
 		[Theory]
-		[InlineData(0, 0)]
+		[InlineData(1, 1)]
 		public void Shot(int x, int y)
 		{
 			var gameState = _game.StartGame();
@@ -60,7 +60,7 @@ namespace BGE.Engine.Test
 				X = x,
 				Y = y
 			}, gameState);
-			newGameState.PlayerState.Field[x, y].Should().Be('X');
+			newGameState.PlayerState.Field[x - 1, y - 1].Should().Be('X');
 		}
 	}
 }
