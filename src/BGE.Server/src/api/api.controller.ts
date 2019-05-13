@@ -11,23 +11,49 @@ import { ShootDto } from './dto/shoot.dto';
 import { StartDto } from './dto/start.dto';
 import { GameState } from './interface/game-state.interface';
 import { PlayerState } from './interface/player-state.interface';
+import { StateDto } from './dto/state.dto';
+import { AuthService } from '../auth/auth.service';
 
-interface IState {
-  hostToken: string;
-  hostState: PlayerState;
-  playerToken?: string;
-  playerState?: PlayerState;
-  rows: number;
-  cols: number;
+interface IDB {
+  _id: string;
+  gameToken: string;
+  state: PlayerState;
+  userId: string;
+  ref?: string;
+}
+
+function generateRandomId() {
+  return (
+    Math.random()
+      .toString(36)
+      .substring(2, 15) +
+    Math.random()
+      .toString(36)
+      .substring(2, 15)
+  );
 }
 
 @Controller('api')
 export class ApiController {
-  private states: IState[] = [];
+  private db: IDB[] = [];
 
   constructor(
     @Inject('SIGNALR_CONNECTION') private readonly connection: HubConnection,
+    private readonly authService: AuthService,
   ) {}
+
+  @HttpCode(200)
+  @Post('/state')
+  public async state(@Body() stateDto: StateDto) {
+    const player = this.db.find(value => value.userId === stateDto.userId);
+    const enemy = this.db.find(value => value._id === player.ref);
+    return { player, enemy };
+  }
+
+  @Post('/reset')
+  public async reset() {
+    this.db = [];
+  }
 
   @HttpCode(200)
   @Post('/start')
@@ -38,39 +64,47 @@ export class ApiController {
       );
     }
 
-    startDto = startDto || {};
-    let token = startDto.token;
-    let playerState;
-    if (!!token) {
-      const index = this.states.findIndex(item => item.hostToken === token);
-      const state = this.states[index];
+    const token = await this.authService.getToken(startDto.userId);
+    const gameTokenExists = !!startDto.gameToken;
+    const gameToken = startDto.gameToken || 'gameToken1';
+    if (gameTokenExists) {
+      const index = this.db.findIndex(
+        item => item.gameToken === startDto.gameToken,
+      );
+      const state = this.db[index];
       const gameState: GameState = await this.connection.invoke('StartGame', {
-        rows: state.rows,
-        cols: state.cols,
+        rows: state.state.field.length,
+        cols: state.state.field[0].length,
       });
-      playerState = gameState.playerState;
-      this.states[index].playerToken = 'token2';
-      this.states[index].playerState = playerState;
-      token = 'token2';
+
+      const id = generateRandomId();
+      this.db.push({
+        state: gameState.playerState,
+        gameToken,
+        userId: startDto.userId,
+        _id: id,
+        ref: state._id,
+      });
+      this.db[index].ref = id;
+      await this.connection.send('AcceptMarker', state.userId);
     } else {
       const cols = startDto.cols || 8;
       const rows = startDto.rows || 8;
 
-      const gameState = await this.connection.invoke('StartGame', {
+      const gameState: GameState = await this.connection.invoke('StartGame', {
         rows,
         cols,
       });
-      playerState = gameState.playerState;
 
-      this.states.push({
-        hostState: gameState.playerState,
-        hostToken: 'token1',
-        cols,
-        rows,
+      this.db.push({
+        _id: generateRandomId(),
+        userId: startDto.userId,
+        gameToken,
+        state: gameState.playerState,
       });
-      token = 'token1';
     }
-    return { playerState, token };
+
+    return { gameToken, token };
   }
 
   @HttpCode(200)
@@ -82,42 +116,17 @@ export class ApiController {
       );
     }
 
-    const state = this.states.find(
-      value =>
-        value.playerToken === shootDto.token ||
-        value.hostToken === shootDto.token,
+    const playerState = this.db.find(value => value.userId === shootDto.userId);
+    const enemyState = this.db.find(value => value._id === playerState.ref);
+    const enemyStateIndex = this.db.indexOf(enemyState);
+    const gameState: GameState = await this.connection.invoke(
+      'Shoot',
+      { x: shootDto.x, y: shootDto.y },
+      {
+        playerState: enemyState.state,
+      },
     );
-
-    if (!state) {
-      throw new InternalServerErrorException('State is not found');
-    }
-
-    const index = this.states.findIndex(
-      value =>
-        value.playerToken === shootDto.token ||
-        value.hostToken === shootDto.token,
-    );
-
-    let gameState: GameState;
-    if (state.hostToken === shootDto.token) {
-      gameState = await this.connection.invoke(
-        'Shoot',
-        { x: shootDto.x, y: shootDto.y },
-        {
-          playerState: state.playerState,
-        },
-      );
-      this.states[index].playerState = gameState.playerState;
-    } else {
-      gameState = await this.connection.invoke(
-        'Shoot',
-        { x: shootDto.x, y: shootDto.y },
-        {
-          playerState: state.playerState,
-        },
-      );
-      this.states[index].hostState = gameState.playerState;
-    }
-    return gameState;
+    this.db[enemyStateIndex].state = gameState.playerState;
+    await this.connection.send('ShootMarker', enemyState.userId);
   }
 }
