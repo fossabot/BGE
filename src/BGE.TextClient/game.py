@@ -1,5 +1,6 @@
 from api import Api
 from printer import BasePrinter, DefaultPrinter
+import os
 
 
 class Game:
@@ -17,6 +18,7 @@ class Game:
         self.api = Api('http://127.0.0.1:3000/api')
 
     def accept(self, game_token):
+        os.system("clear")
         player = self.api.start_game(self.user_id, game_token)
         state = self.api.state(self.user_id)
         self.printer.draw_field(state["player"]["state"]["field"],
@@ -24,6 +26,7 @@ class Game:
         return player["token"]
 
     def accepted(self):
+        os.system("clear")
         state = self.api.state(self.user_id)
         print("Opponent accepted challenge")
         self.printer.draw_field(state["player"]["state"]["field"],
@@ -37,6 +40,7 @@ class Game:
         self.api.reset()
 
     def shot(self):
+        os.system("clear")
         state = self.api.state(self.user_id)
         self.printer.draw_field(state["player"]["state"]["field"],
                                 state["enemy"]["state"]["field"])
@@ -46,10 +50,10 @@ class Game:
             print("Enemy turn")
 
     def shoot(self, x, y):
+        os.system("clear")
         result = self.api.shoot(x, y, self.user_id)
         if result is not None:
             print(result["message"])
-            return
 
         state = self.api.state(self.user_id)
         self.printer.draw_field(state["player"]["state"]["field"],
