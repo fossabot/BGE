@@ -42,7 +42,7 @@ namespace BGE.Engine.SignalR
 		}
 		
 		[HubMethodName("Shoot")]
-		public async Task<GameState> Shoot(ShootRequest shootRequest, GameState gameState)
+		public async Task<ShootResponse> Shoot(ShootRequest shootRequest, GameState gameState)
 		{
 			var context = new ValidationContext<ShootRequest>(shootRequest);
 			context.RootContextData.Add(new KeyValuePair<string, object>("gameState", gameState));

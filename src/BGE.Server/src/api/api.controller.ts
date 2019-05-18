@@ -13,6 +13,7 @@ import { GameState } from './interface/game-state.interface';
 import { PlayerState } from './interface/player-state.interface';
 import { StateDto } from './dto/state.dto';
 import { AuthService } from '../auth/auth.service';
+import { ShootResponse } from './interface/shoot-response.interface';
 
 interface IDB {
   _id: string;
@@ -128,16 +129,18 @@ export class ApiController {
     }
 
     const enemyState = this.db.find(value => value._id === playerState.ref);
-    const gameState: GameState = await this.connection.invoke(
+    const shootResponse: ShootResponse = await this.connection.invoke(
       'Shoot',
       { x: shootDto.x, y: shootDto.y },
       {
         playerState: enemyState.state,
       },
     );
-    enemyState.state = gameState.playerState;
-    enemyState.turn = true;
-    playerState.turn = false;
+    enemyState.state = shootResponse.gameState.playerState;
+    if (!shootResponse.hit) {
+      enemyState.turn = true;
+      playerState.turn = false;
+    }
     await this.connection.send('ShootMarker', enemyState.userId);
   }
 }

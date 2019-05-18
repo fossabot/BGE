@@ -90,10 +90,17 @@ namespace BGE.Engine.Game
 			}
 		}
 
-		public GameState Shoot(ShootRequest shootRequest, GameState gameState)
+		public ShootResponse Shoot(ShootRequest shootRequest, GameState gameState)
 		{
-			gameState.PlayerState.Field[shootRequest.X - 1, shootRequest.Y - 1] = 'X';
-			return gameState;
+			var x = shootRequest.X - 1;
+			var y = shootRequest.Y - 1;
+			var shootResponse = new ShootResponse
+			{
+				Hit = gameState.PlayerState.Field[x, y] == '0'
+			};
+			gameState.PlayerState.Field[x, y] = 'X';
+			shootResponse.GameState = gameState;
+			return shootResponse;
 		}
 
 		public PlayerState Cleanse(PlayerState playerState)

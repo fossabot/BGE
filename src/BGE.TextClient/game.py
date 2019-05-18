@@ -40,7 +40,10 @@ class Game:
         state = self.api.state(self.user_id)
         self.printer.draw_field(state["player"]["state"]["field"],
                                 state["enemy"]["state"]["field"])
-        print("Your turn")
+        if state["player"]["turn"]:
+            print("Your turn")
+        else:
+            print("Enemy turn")
 
     def shoot(self, x, y):
         result = self.api.shoot(x, y, self.user_id)
@@ -51,4 +54,7 @@ class Game:
         state = self.api.state(self.user_id)
         self.printer.draw_field(state["player"]["state"]["field"],
                                 state["enemy"]["state"]["field"])
-        print("Enemy turn")
+        if state["player"]["turn"]:
+            print("Your turn")
+        else:
+            print("Enemy turn")

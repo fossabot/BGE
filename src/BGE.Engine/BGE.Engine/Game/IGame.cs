@@ -5,7 +5,7 @@ namespace BGE.Engine.Game
 	public interface IGame
 	{
 		GameState StartGame(int rows = 8, int cols = 8);
-		GameState Shoot(ShootRequest shootRequest, GameState gameState);
+		ShootResponse Shoot(ShootRequest shootRequest, GameState gameState);
 		PlayerState Cleanse(PlayerState playerState);
 		string GameStats();
 	}
