@@ -75,10 +75,7 @@ export class ApiController {
     const gameTokenExists = !!startDto.gameToken;
     const gameToken = startDto.gameToken || 'gameToken1';
     if (gameTokenExists) {
-      const index = this.db.findIndex(
-        item => item.gameToken === startDto.gameToken,
-      );
-      const state = this.db[index];
+      const state = this.db.find(item => item.gameToken === startDto.gameToken);
       const gameState: GameState = await this.connection.invoke('StartGame', {
         rows: state.state.field.length,
         cols: state.state.field[0].length,
@@ -93,7 +90,7 @@ export class ApiController {
         ref: state._id,
         turn: false,
       });
-      this.db[index].ref = id;
+      state.ref = id;
       await this.connection.send('AcceptMarker', state.userId);
     } else {
       const cols = startDto.cols || 8;
@@ -130,9 +127,7 @@ export class ApiController {
       return { message: 'Not your move' };
     }
 
-    const playerStateIndex = this.db.indexOf(playerState);
     const enemyState = this.db.find(value => value._id === playerState.ref);
-    const enemyStateIndex = this.db.indexOf(enemyState);
     const gameState: GameState = await this.connection.invoke(
       'Shoot',
       { x: shootDto.x, y: shootDto.y },
@@ -140,9 +135,9 @@ export class ApiController {
         playerState: enemyState.state,
       },
     );
-    this.db[enemyStateIndex].state = gameState.playerState;
-    this.db[enemyStateIndex].turn = true;
-    this.db[playerStateIndex].turn = false;
+    enemyState.state = gameState.playerState;
+    enemyState.turn = true;
+    playerState.turn = false;
     await this.connection.send('ShootMarker', enemyState.userId);
   }
 }

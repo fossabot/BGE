@@ -25,6 +25,7 @@ class Game:
 
     def accepted(self):
         state = self.api.state(self.user_id)
+        print("Opponent accepted challenge")
         self.printer.draw_field(state["player"]["state"]["field"],
                                 state["enemy"]["state"]["field"])
 
