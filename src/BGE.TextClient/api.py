@@ -14,7 +14,11 @@ class Api:
         return _send_request(f'{self.url}/start', data)
 
     def shoot(self, x: int, y: int, user_id: str):
-        _send_request(f'{self.url}/shoot', {"userId": user_id, "x": x, "y": y})
+        return _send_request(f'{self.url}/shoot', {
+            "userId": user_id,
+            "x": x,
+            "y": y
+        })
 
     def state(self, user_id: str):
         return _send_request(f'{self.url}/state', {"userId": user_id})

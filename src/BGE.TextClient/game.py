@@ -39,9 +39,15 @@ class Game:
         state = self.api.state(self.user_id)
         self.printer.draw_field(state["player"]["state"]["field"],
                                 state["enemy"]["state"]["field"])
+        print("Your turn")
 
     def shoot(self, x, y):
-        self.api.shoot(x, y, self.user_id)
+        result = self.api.shoot(x, y, self.user_id)
+        if result is not None:
+            print(result["message"])
+            return
+
         state = self.api.state(self.user_id)
         self.printer.draw_field(state["player"]["state"]["field"],
                                 state["enemy"]["state"]["field"])
+        print("Enemy turn")

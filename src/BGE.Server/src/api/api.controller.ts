@@ -20,6 +20,7 @@ interface IDB {
   state: PlayerState;
   userId: string;
   ref?: string;
+  turn: boolean;
 }
 
 function generateRandomId() {
@@ -46,8 +47,14 @@ export class ApiController {
   @Post('/state')
   public async state(@Body() stateDto: StateDto) {
     const player = this.db.find(value => value.userId === stateDto.userId);
-    const enemy = this.db.find(value => value._id === player.ref);
-    return { player, enemy };
+    const enemy = JSON.parse(
+      JSON.stringify(this.db.find(value => value._id === player.ref)),
+    );
+    enemy.state = await this.connection.invoke('Cleanse', enemy.state);
+    return {
+      player,
+      enemy,
+    };
   }
 
   @Post('/reset')
@@ -84,6 +91,7 @@ export class ApiController {
         userId: startDto.userId,
         _id: id,
         ref: state._id,
+        turn: false,
       });
       this.db[index].ref = id;
       await this.connection.send('AcceptMarker', state.userId);
@@ -101,6 +109,7 @@ export class ApiController {
         userId: startDto.userId,
         gameToken,
         state: gameState.playerState,
+        turn: true,
       });
     }
 
@@ -117,6 +126,11 @@ export class ApiController {
     }
 
     const playerState = this.db.find(value => value.userId === shootDto.userId);
+    if (!playerState.turn) {
+      return { message: 'Not your move' };
+    }
+
+    const playerStateIndex = this.db.indexOf(playerState);
     const enemyState = this.db.find(value => value._id === playerState.ref);
     const enemyStateIndex = this.db.indexOf(enemyState);
     const gameState: GameState = await this.connection.invoke(
@@ -127,6 +141,8 @@ export class ApiController {
       },
     );
     this.db[enemyStateIndex].state = gameState.playerState;
+    this.db[enemyStateIndex].turn = true;
+    this.db[playerStateIndex].turn = false;
     await this.connection.send('ShootMarker', enemyState.userId);
   }
 }

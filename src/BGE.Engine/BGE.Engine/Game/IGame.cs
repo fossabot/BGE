@@ -6,6 +6,7 @@ namespace BGE.Engine.Game
 	{
 		GameState StartGame(int rows = 8, int cols = 8);
 		GameState Shoot(ShootRequest shootRequest, GameState gameState);
+		PlayerState Cleanse(PlayerState playerState);
 		string GameStats();
 	}
 }

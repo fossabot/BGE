@@ -96,6 +96,21 @@ namespace BGE.Engine.Game
 			return gameState;
 		}
 
+		public PlayerState Cleanse(PlayerState playerState)
+		{
+			var field = playerState.Field;
+			for (var i = 0; i < field.GetUpperBound(0) + 1; i++)
+			{
+				for (var j = 0; j < field.GetUpperBound(1) + 1; j++)
+				{
+					if (field[i, j] == '0')
+						field[i, j] = ' ';
+				}
+			}
+
+			return playerState;
+		}
+
 		public string GameStats()
 		{
 			throw new NotImplementedException();

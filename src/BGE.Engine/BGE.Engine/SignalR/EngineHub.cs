@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using BGE.Engine.Game;
 using FluentValidation;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace BGE.Engine.SignalR
@@ -28,7 +27,12 @@ namespace BGE.Engine.SignalR
 			await Clients.User(userId).SendAsync("Accepted");
 		}
 		
-		
+		[HubMethodName("Cleanse")]
+		public Task<PlayerState> Cleanse(PlayerState playerState)
+		{
+			return Task.FromResult(_game.Cleanse(playerState));
+		}
+
 		[HubMethodName("StartGame")]
 		public async Task<GameState> StartGame(StartRequest startRequest)
 		{
