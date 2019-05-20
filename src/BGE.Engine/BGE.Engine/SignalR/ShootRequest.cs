@@ -34,19 +34,19 @@ namespace BGE.Engine.SignalR
 			var result = await base.ValidateAsync(context, cancellation);
 			if (!(context.RootContextData["playerState"] is PlayerState playerState))
 			{
-				result.Errors.Add(new ValidationFailure("PlayerState", "No player state is supplied!"));
+				result.Errors.Add(new ValidationFailure("PlayerState", "No player state is supplied"));
 				return result;
 			}
 
 			var shootRequest = context.InstanceToValidate;
 			if (!IsValid(shootRequest.X, playerState, 0))
-				result.Errors.Add(new ValidationFailure("X", "Wrong X!", shootRequest.X));
+				result.Errors.Add(new ValidationFailure("X", "X value is out of bounds", shootRequest.X));
 			
 			if (!IsValid(shootRequest.Y, playerState, 1))
-				result.Errors.Add(new ValidationFailure("Y", "Wrong Y!", shootRequest.Y));
+				result.Errors.Add(new ValidationFailure("Y", "Y value is out of bounds", shootRequest.Y));
 			
 			if(playerState.Field[shootRequest.X - 1, shootRequest.Y - 1] == 'X')
-				result.Errors.Add(new ValidationFailure("XY","Invalid cell!"));
+				result.Errors.Add(new ValidationFailure("XY","The cell is already shot"));
 
 			return result;
 		}
