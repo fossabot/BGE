@@ -4,8 +4,9 @@ import { HubConnection } from '@aspnet/signalr';
 import { Model } from 'mongoose';
 import { GameState } from './interface/game-state.interface';
 import { AuthService } from '../auth/auth.service';
-import { StartDto } from './dto/start.dto';
+import { StartRequest } from './dto/start-request.dto';
 import { PlayerState } from './interface/player-state.interface';
+import { ShootResponse } from './dto/shoot-response.dto';
 
 function generateRandomToken() {
   return (
@@ -27,22 +28,81 @@ export class ApiService {
     private readonly authService: AuthService,
   ) {}
 
-  public async start(startDto: StartDto) {
-    const gameTokenExists = !!startDto.gameToken;
-    const gameToken = startDto.gameToken || generateRandomToken();
+  public async start(startRequest: StartRequest) {
+    const gameTokenExists = !!startRequest.gameToken;
+    const gameToken = startRequest.gameToken || generateRandomToken();
     if (gameTokenExists) {
-      await this.acceptGame(gameToken, startDto.userId);
+      await this.acceptGame(gameToken, startRequest.userId);
     } else {
       await this.createGame(
-        startDto.cols || 8,
-        startDto.rows || 8,
-        startDto.userId,
+        startRequest.cols || 8,
+        startRequest.rows || 8,
+        startRequest.userId,
         gameToken,
       );
     }
 
-    const userToken = await this.authService.getToken(startDto.userId);
+    const userToken = await this.authService.getToken(startRequest.userId);
     return { gameToken, userToken };
+  }
+
+  public async shoot(userId: string, x: number, y: number) {
+    const gameState: GameState = await this.gameStateModel
+      .findOne({ userId })
+      .exec();
+
+    if (!gameState.turn) {
+      return { message: 'Not your move' };
+    }
+
+    const opponentGameState: GameState = await this.gameStateModel
+      .findOne({ _id: gameState._ref })
+      .exec();
+
+    const shootResponse: ShootResponse = await this.connection.invoke(
+      'Shoot',
+      { x, y },
+      {
+        playerState: opponentGameState.playerState,
+      },
+    );
+
+    await this.gameStateModel
+      .updateOne(
+        { _id: opponentGameState._id },
+        { playerState: shootResponse.playerState },
+      )
+      .exec();
+
+    if (!shootResponse.hit) {
+      await this.gameStateModel
+        .updateOne({ _id: opponentGameState._id }, { turn: true })
+        .exec();
+      await this.gameStateModel
+        .updateOne({ _id: gameState._id }, { turn: false })
+        .exec();
+    }
+
+    await this.connection.send('ShootMarker', opponentGameState.userId);
+  }
+
+  public async state(userId: string) {
+    const playerGameState = await this.gameStateModel
+      .findOne({ userId })
+      .exec();
+
+    const opponentGameState = await this.gameStateModel
+      .findOne({ _id: playerGameState._ref })
+      .exec();
+    opponentGameState.playerState = await this.connection.invoke(
+      'Cleanse',
+      opponentGameState.playerState,
+    );
+
+    return {
+      playerGameState,
+      opponentGameState,
+    };
   }
 
   private async acceptGame(gameToken: string, userId: string) {

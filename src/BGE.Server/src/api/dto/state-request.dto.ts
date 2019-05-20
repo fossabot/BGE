@@ -1,3 +1,3 @@
-export class StateDto {
+export class StateRequest {
   readonly userId: string;
 }
