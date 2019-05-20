@@ -34,7 +34,7 @@ namespace BGE.Engine.SignalR
 		}
 
 		[HubMethodName("StartGame")]
-		public async Task<GameState> StartGame(StartRequest startRequest)
+		public async Task<PlayerState> StartGame(StartRequest startRequest)
 		{
 			var validator = new StartRequestValidator();
 			await validator.ValidateAndThrowAsync(startRequest);
@@ -42,17 +42,17 @@ namespace BGE.Engine.SignalR
 		}
 		
 		[HubMethodName("Shoot")]
-		public async Task<ShootResponse> Shoot(ShootRequest shootRequest, GameState gameState)
+		public async Task<ShootResponse> Shoot(ShootRequest shootRequest, PlayerState playerState)
 		{
 			var context = new ValidationContext<ShootRequest>(shootRequest);
-			context.RootContextData.Add(new KeyValuePair<string, object>("gameState", gameState));
+			context.RootContextData.Add(new KeyValuePair<string, object>("playerState", playerState));
 			var validator = new ShootRequestValidator();
 			var result = await validator.ValidateAsync(context);
 			
 			if(!result.IsValid)
 				throw new ValidationException(result.Errors);
 			
-			return _game.Shoot(shootRequest, gameState);
+			return _game.Shoot(shootRequest, playerState);
 		}
 	}
 }

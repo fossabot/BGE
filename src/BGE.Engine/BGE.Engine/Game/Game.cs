@@ -12,19 +12,14 @@ namespace BGE.Engine.Game
 			_random = new Random();
 		}
 		
-		public GameState StartGame(int rows = 8, int cols = 8)
+		public PlayerState StartGame(int rows = 8, int cols = 8)
 		{
 			var playerState = new PlayerState
 			{
 				Field = GenerateRandomField(rows, cols)
 			};
 
-			var gameState = new GameState
-			{
-				PlayerState = playerState
-			};
-			
-			return gameState;
+			return playerState;
 		}
 
 		private char[,] GenerateRandomField(int rows, int cols)
@@ -90,16 +85,16 @@ namespace BGE.Engine.Game
 			}
 		}
 
-		public ShootResponse Shoot(ShootRequest shootRequest, GameState gameState)
+		public ShootResponse Shoot(ShootRequest shootRequest, PlayerState playerState)
 		{
 			var x = shootRequest.X - 1;
 			var y = shootRequest.Y - 1;
 			var shootResponse = new ShootResponse
 			{
-				Hit = gameState.PlayerState.Field[x, y] == '0'
+				Hit = playerState.Field[x, y] == '0'
 			};
-			gameState.PlayerState.Field[x, y] = 'X';
-			shootResponse.GameState = gameState;
+			playerState.Field[x, y] = 'X';
+			shootResponse.PlayerState = playerState;
 			return shootResponse;
 		}
 

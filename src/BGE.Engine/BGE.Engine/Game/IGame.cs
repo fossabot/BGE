@@ -4,8 +4,8 @@ namespace BGE.Engine.Game
 {
 	public interface IGame
 	{
-		GameState StartGame(int rows = 8, int cols = 8);
-		ShootResponse Shoot(ShootRequest shootRequest, GameState gameState);
+		PlayerState StartGame(int rows = 8, int cols = 8);
+		ShootResponse Shoot(ShootRequest shootRequest, PlayerState playerState);
 		PlayerState Cleanse(PlayerState playerState);
 		string GameStats();
 	}

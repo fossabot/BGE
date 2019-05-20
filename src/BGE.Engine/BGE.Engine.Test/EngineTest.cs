@@ -43,8 +43,8 @@ namespace BGE.Engine.Test
 		[InlineData(10, 10)]
 		public void StartCustomSize(int rows, int cols)
 		{
-			var gameState = _game.StartGame(rows, cols);
-			var field = gameState.PlayerState.Field;
+			var playerState = _game.StartGame(rows, cols);
+			var field = playerState.Field;
 			var (cells, ships) = GetCount(field);
 			ships.Should().Be(9);
 			cells.Should().Be(rows * cols);
@@ -54,13 +54,13 @@ namespace BGE.Engine.Test
 		[InlineData(1, 1)]
 		public void Shot(int x, int y)
 		{
-			var gameState = _game.StartGame();
-			var newGameState = _game.Shoot(new ShootRequest
+			var playerState = _game.StartGame();
+			var shootResponse = _game.Shoot(new ShootRequest
 			{
 				X = x,
 				Y = y
-			}, gameState);
-			newGameState.PlayerState.Field[x - 1, y - 1].Should().Be('X');
+			}, playerState);
+			shootResponse.PlayerState.Field[x - 1, y - 1].Should().Be('X');
 		}
 	}
 }

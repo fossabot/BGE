@@ -14,6 +14,9 @@ import { PlayerState } from './interface/player-state.interface';
 import { StateDto } from './dto/state.dto';
 import { AuthService } from '../auth/auth.service';
 import { ShootResponse } from './interface/shoot-response.interface';
+import { GAME_STATE_MODEL, SIGNALR_CONNECTION } from '../constants';
+import { Model } from 'mongoose';
+import { ApiService } from './api.service';
 
 interface IDB {
   _id: string;
@@ -40,8 +43,9 @@ export class ApiController {
   private db: IDB[] = [];
 
   constructor(
-    @Inject('SIGNALR_CONNECTION') private readonly connection: HubConnection,
+    @Inject(SIGNALR_CONNECTION) private readonly connection: HubConnection,
     private readonly authService: AuthService,
+    private readonly apiService: ApiService,
   ) {}
 
   @HttpCode(200)
@@ -72,7 +76,9 @@ export class ApiController {
       );
     }
 
-    const token = await this.authService.getToken(startDto.userId);
+    return await this.apiService.start(startDto);
+
+    /* const token = await this.authService.getToken(startDto.userId);
     const gameTokenExists = !!startDto.gameToken;
     const gameToken = startDto.gameToken || 'gameToken1';
     if (gameTokenExists) {
@@ -111,7 +117,7 @@ export class ApiController {
       });
     }
 
-    return { gameToken, token };
+    return { gameToken, token };*/
   }
 
   @HttpCode(200)
