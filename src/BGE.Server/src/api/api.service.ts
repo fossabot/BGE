@@ -28,55 +28,67 @@ export class ApiService {
   ) {}
 
   public async start(startDto: StartDto) {
-    const token = await this.authService.getToken(startDto.userId);
     const gameTokenExists = !!startDto.gameToken;
     const gameToken = startDto.gameToken || generateRandomToken();
     if (gameTokenExists) {
-      const gameState = await this.gameStateModel
-        .findOne({
-          gameToken: startDto.gameToken,
-        })
-        .exec();
-      const playerState: PlayerState = await this.connection.invoke(
-        'StartGame',
-        {
-          rows: gameState.playerState.field.length,
-          cols: gameState.playerState.field[0].length,
-        },
-      );
-
-      const newGameState = await new this.gameStateModel({
-        playerState,
-        gameToken,
-        userId: startDto.userId,
-        _ref: gameState._id,
-        turn: false,
-      }).save();
-      await this.gameStateModel
-        .updateOne({ _id: gameState._id }, { _ref: newGameState._id })
-        .exec();
-      await this.connection.send('AcceptMarker', gameState.userId);
+      await this.acceptGame(gameToken, startDto.userId);
     } else {
-      const cols = startDto.cols || 8;
-      const rows = startDto.rows || 8;
-
-      const playerState: PlayerState = await this.connection.invoke(
-        'StartGame',
-        {
-          rows,
-          cols,
-        },
-      );
-
-      await new this.gameStateModel({
-        playerState,
+      await this.createGame(
+        startDto.cols || 8,
+        startDto.rows || 8,
+        startDto.userId,
         gameToken,
-        userId: startDto.userId,
-        turn: true,
-        _ref: null,
-      }).save();
+      );
     }
 
-    return { gameToken, token };
+    const userToken = await this.authService.getToken(startDto.userId);
+    return { gameToken, userToken };
+  }
+
+  private async acceptGame(gameToken: string, userId: string) {
+    const gameState = await this.gameStateModel
+      .findOne({
+        gameToken,
+      })
+      .exec();
+
+    const playerState: PlayerState = await this.connection.invoke('StartGame', {
+      rows: gameState.playerState.field.length,
+      cols: gameState.playerState.field[0].length,
+    });
+
+    const newGameState = await new this.gameStateModel({
+      playerState,
+      gameToken,
+      userId,
+      _ref: gameState._id,
+      turn: false,
+    }).save();
+
+    await this.gameStateModel
+      .updateOne({ _id: gameState._id }, { _ref: newGameState._id })
+      .exec();
+
+    await this.connection.send('AcceptMarker', gameState.userId);
+  }
+
+  private async createGame(
+    cols: number,
+    rows: number,
+    userId: string,
+    gameToken: string,
+  ) {
+    const playerState: PlayerState = await this.connection.invoke('StartGame', {
+      rows,
+      cols,
+    });
+
+    await new this.gameStateModel({
+      playerState,
+      gameToken,
+      userId,
+      turn: true,
+      _ref: null,
+    }).save();
   }
 }
