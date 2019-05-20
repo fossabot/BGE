@@ -9,13 +9,11 @@ import {
 import { HubConnection, HubConnectionState } from '@aspnet/signalr';
 import { ShootDto } from './dto/shoot.dto';
 import { StartDto } from './dto/start.dto';
-import { GameState } from './interface/game-state.interface';
 import { PlayerState } from './interface/player-state.interface';
 import { StateDto } from './dto/state.dto';
 import { AuthService } from '../auth/auth.service';
 import { ShootResponse } from './interface/shoot-response.interface';
-import { GAME_STATE_MODEL, SIGNALR_CONNECTION } from '../constants';
-import { Model } from 'mongoose';
+import { SIGNALR_CONNECTION } from '../constants';
 import { ApiService } from './api.service';
 
 interface IDB {
@@ -25,17 +23,6 @@ interface IDB {
   userId: string;
   ref?: string;
   turn: boolean;
-}
-
-function generateRandomId() {
-  return (
-    Math.random()
-      .toString(36)
-      .substring(2, 15) +
-    Math.random()
-      .toString(36)
-      .substring(2, 15)
-  );
 }
 
 @Controller('api')
@@ -77,47 +64,6 @@ export class ApiController {
     }
 
     return await this.apiService.start(startDto);
-
-    /* const token = await this.authService.getToken(startDto.userId);
-    const gameTokenExists = !!startDto.gameToken;
-    const gameToken = startDto.gameToken || 'gameToken1';
-    if (gameTokenExists) {
-      const state = this.db.find(item => item.gameToken === startDto.gameToken);
-      const gameState: GameState = await this.connection.invoke('StartGame', {
-        rows: state.state.field.length,
-        cols: state.state.field[0].length,
-      });
-
-      const id = generateRandomId();
-      this.db.push({
-        state: gameState.playerState,
-        gameToken,
-        userId: startDto.userId,
-        _id: id,
-        ref: state._id,
-        turn: false,
-      });
-      state.ref = id;
-      await this.connection.send('AcceptMarker', state.userId);
-    } else {
-      const cols = startDto.cols || 8;
-      const rows = startDto.rows || 8;
-
-      const gameState: GameState = await this.connection.invoke('StartGame', {
-        rows,
-        cols,
-      });
-
-      this.db.push({
-        _id: generateRandomId(),
-        userId: startDto.userId,
-        gameToken,
-        state: gameState.playerState,
-        turn: true,
-      });
-    }
-
-    return { gameToken, token };*/
   }
 
   @HttpCode(200)
