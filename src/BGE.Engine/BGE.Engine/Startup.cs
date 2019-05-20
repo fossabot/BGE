@@ -1,5 +1,4 @@
-﻿using System;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Threading.Tasks;
 using BGE.Engine.Game;
 using BGE.Engine.SignalR;
@@ -7,7 +6,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
 namespace BGE.Engine
@@ -66,17 +64,10 @@ namespace BGE.Engine
 		private SecurityToken SignatureValidator(string token, TokenValidationParameters validationparameters)
 		{
 			return new JwtSecurityToken(token);
-			throw new NotImplementedException();
 		}
 
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 		{
-			/*app.Run(context =>
-			{
-				var game = new Game.Game();
-				game.StartGame();
-				return Task.CompletedTask;
-			});*/
 			app.UseAuthentication();
 			app.UseSignalR(routes => routes.MapHub<EngineHub>("/engine"));
 		}

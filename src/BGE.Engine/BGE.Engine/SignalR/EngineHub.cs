@@ -1,7 +1,5 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using BGE.Engine.Game;
-using FluentValidation;
 using Microsoft.AspNetCore.SignalR;
 
 namespace BGE.Engine.SignalR
@@ -16,16 +14,16 @@ namespace BGE.Engine.SignalR
 		}
 		
 		[HubMethodName("ShootMarker")]
-		public async Task Shoot(string userId)
-		{
-			await Clients.User(userId).SendAsync("Shot");
-		}
+		public Task ShootMarker(string userId)
+        {
+            return Clients.User(userId).SendAsync("Shot");
+        }
 		
 		[HubMethodName("AcceptMarker")]
-		public async Task Accept(string userId)
-		{
-			await Clients.User(userId).SendAsync("Accepted");
-		}
+		public Task AcceptMarker(string userId)
+        {
+            return Clients.User(userId).SendAsync("Accepted");
+        }
 		
 		[HubMethodName("Cleanse")]
 		public Task<PlayerState> Cleanse(PlayerState playerState)
@@ -35,23 +33,15 @@ namespace BGE.Engine.SignalR
 
 		[HubMethodName("StartGame")]
 		public async Task<PlayerState> StartGame(StartRequest startRequest)
-		{
-			var validator = new StartRequestValidator();
-			await validator.ValidateAndThrowAsync(startRequest);
+        {
+            await startRequest.ValidateAndThrowAsync();
 			return _game.StartGame(startRequest.Rows, startRequest.Cols);
 		}
 		
 		[HubMethodName("Shoot")]
 		public async Task<ShootResponse> Shoot(ShootRequest shootRequest, PlayerState playerState)
-		{
-			var context = new ValidationContext<ShootRequest>(shootRequest);
-			context.RootContextData.Add(new KeyValuePair<string, object>("playerState", playerState));
-			var validator = new ShootRequestValidator();
-			var result = await validator.ValidateAsync(context);
-			
-			if(!result.IsValid)
-				throw new ValidationException(result.Errors);
-			
+        {
+            await shootRequest.ValidateAndThrowAsync(playerState);
 			return _game.Shoot(shootRequest, playerState);
 		}
 	}

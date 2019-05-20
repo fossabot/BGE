@@ -112,10 +112,5 @@ namespace BGE.Engine.Game
 
 			return playerState;
 		}
-
-		public string GameStats()
-		{
-			throw new NotImplementedException();
-		}
 	}
 }

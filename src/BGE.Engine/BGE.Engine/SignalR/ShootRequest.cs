@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using BGE.Engine.Game;
@@ -11,6 +12,20 @@ namespace BGE.Engine.SignalR
 		public int X { get; set; }
 		public int Y { get; set; }
 	}
+
+    public static class ShootRequestExtensions
+    {
+        public static async Task ValidateAndThrowAsync(this ShootRequest shootRequest, PlayerState playerState)
+        {
+            var context = new ValidationContext<ShootRequest>(shootRequest);
+            context.RootContextData.Add(new KeyValuePair<string, object>("playerState", playerState));
+            var validator = new ShootRequestValidator();
+            var result = await validator.ValidateAsync(context);
+
+            if (!result.IsValid)
+                throw new ValidationException(result.Errors);
+        }
+    }
 
 	public class ShootRequestValidator : AbstractValidator<ShootRequest>
 	{
@@ -43,4 +58,6 @@ namespace BGE.Engine.SignalR
 			return 1 <= value && value <= max;
 		}
 	}
+
+
 }

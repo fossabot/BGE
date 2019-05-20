@@ -1,10 +1,7 @@
-using System;
 using BGE.Engine.Game;
 using BGE.Engine.SignalR;
 using FluentAssertions;
 using Xunit;
-using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace BGE.Engine.Test
 {
@@ -62,5 +59,21 @@ namespace BGE.Engine.Test
 			}, playerState);
 			shootResponse.PlayerState.Field[x - 1, y - 1].Should().Be('X');
 		}
-	}
+
+        [Theory]
+        [InlineData(6, 6)]
+        [InlineData(8, 8)]
+        [InlineData(12, 9)]
+        [InlineData(13, 7)]
+        [InlineData(8, 7)]
+        [InlineData(10, 10)]
+        public void Cleanse(int rows, int cols)
+        {
+            var playerState = _game.StartGame(rows, cols);
+            var cleansed = _game.Cleanse(playerState);
+            var (cells, ships) = GetCount(cleansed.Field);
+            cells.Should().Be(rows * cols);
+            ships.Should().Be(0);
+        }
+    }
 }
