@@ -4,6 +4,7 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
+import * as helmet from 'helmet';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
@@ -14,6 +15,8 @@ async function bootstrap() {
   );
 
   const { httpAdapter } = app.get(HttpAdapterHost);
+
+  app.use(helmet());
 
   app.useGlobalPipes(
     new ValidationPipe({
