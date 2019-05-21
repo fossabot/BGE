@@ -1,5 +1,5 @@
 import { HubConnection } from '@aspnet/signalr';
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { AuthService } from '../auth/auth.service';
 import { GAME_STATE_MODEL, SIGNALR_CONNECTION } from '../common/constants';
@@ -52,7 +52,7 @@ export class ApiService {
       .exec();
 
     if (!gameState.turn) {
-      return { message: 'Not your move' };
+      throw new BadRequestException('Not your move');
     }
 
     const opponentGameState: GameState = await this.gameStateModel
