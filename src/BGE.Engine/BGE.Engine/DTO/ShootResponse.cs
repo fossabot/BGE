@@ -1,6 +1,6 @@
 using BGE.Engine.Game;
 
-namespace BGE.Engine.SignalR
+namespace BGE.Engine.DTO
 {
 	public class ShootResponse
 	{

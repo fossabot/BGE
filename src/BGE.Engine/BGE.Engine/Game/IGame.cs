@@ -1,4 +1,4 @@
-using BGE.Engine.SignalR;
+using BGE.Engine.DTO;
 
 namespace BGE.Engine.Game
 {

@@ -1,5 +1,5 @@
+using BGE.Engine.DTO;
 using BGE.Engine.Game;
-using BGE.Engine.SignalR;
 using FluentAssertions;
 using Xunit;
 

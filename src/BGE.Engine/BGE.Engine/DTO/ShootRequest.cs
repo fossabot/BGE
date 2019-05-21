@@ -5,7 +5,7 @@ using BGE.Engine.Game;
 using FluentValidation;
 using FluentValidation.Results;
 
-namespace BGE.Engine.SignalR
+namespace BGE.Engine.DTO
 {
 	public class ShootRequest
 	{

@@ -1,8 +1,9 @@
 using System.Threading.Tasks;
+using BGE.Engine.DTO;
 using BGE.Engine.Game;
 using Microsoft.AspNetCore.SignalR;
 
-namespace BGE.Engine.SignalR
+namespace BGE.Engine.Hubs
 {
 	public class EngineHub : Hub
 	{

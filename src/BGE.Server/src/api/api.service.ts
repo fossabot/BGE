@@ -59,12 +59,12 @@ export class ApiService {
       .findOne({ _id: gameState._ref })
       .exec();
 
+    console.log(opponentGameState.playerState);
+
     const shootResponse: ShootResponse = await this.connection.invoke(
       'Shoot',
       { x, y },
-      {
-        playerState: opponentGameState.playerState,
-      },
+      opponentGameState.playerState,
     );
 
     await this.gameStateModel

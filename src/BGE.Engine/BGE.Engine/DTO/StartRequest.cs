@@ -1,9 +1,7 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using BGE.Engine.Game;
 using FluentValidation;
 
-namespace BGE.Engine.SignalR
+namespace BGE.Engine.DTO
 {
 	public class StartRequest
 	{

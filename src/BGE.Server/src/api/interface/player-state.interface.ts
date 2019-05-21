@@ -1,5 +1,3 @@
-import { Document } from 'mongoose';
-
-export interface PlayerState extends Document {
+export interface PlayerState {
   field: string[][];
 }
