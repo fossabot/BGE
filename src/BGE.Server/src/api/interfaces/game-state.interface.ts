@@ -1,5 +1,5 @@
-import { PlayerState } from './player-state.interface';
 import { Document } from 'mongoose';
+import { PlayerState } from './player-state.interface';
 
 export interface GameState extends Document {
   playerState: PlayerState;

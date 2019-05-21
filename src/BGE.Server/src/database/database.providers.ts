@@ -1,7 +1,7 @@
-import * as mongoose from 'mongoose';
-import { DATABASE_CONNECTION } from '../constants';
-import { ConfigService } from '../config/config.service';
 import { Provider } from '@nestjs/common';
+import * as mongoose from 'mongoose';
+import { DATABASE_CONNECTION } from '../common/constants';
+import { ConfigService } from '../config/config.service';
 
 export const databaseProviders: Provider[] = [
   {

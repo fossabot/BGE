@@ -1,12 +1,12 @@
-import { Provider } from '@nestjs/common';
 import * as signalR from '@aspnet/signalr';
+import { Provider } from '@nestjs/common';
 import { Connection } from 'mongoose';
+import { ConfigService } from '../config/config.service';
 import {
   DATABASE_CONNECTION,
   GAME_STATE_MODEL,
   SIGNALR_CONNECTION,
-} from '../constants';
-import { ConfigService } from '../config/config.service';
+} from '../common/constants';
 import { GameStateSchema } from './schemas/game-state.schema';
 
 const signalRProvider: Provider = {

@@ -1,12 +1,12 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { GAME_STATE_MODEL, SIGNALR_CONNECTION } from '../constants';
 import { HubConnection } from '@aspnet/signalr';
+import { Inject, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
-import { GameState } from './interface/game-state.interface';
 import { AuthService } from '../auth/auth.service';
-import { StartRequest } from './dto/start-request.dto';
-import { PlayerState } from './interface/player-state.interface';
+import { GAME_STATE_MODEL, SIGNALR_CONNECTION } from '../common/constants';
 import { ShootResponse } from './dto/shoot-response.dto';
+import { StartRequest } from './dto/start-request.dto';
+import { GameState } from './interfaces/game-state.interface';
+import { PlayerState } from './interfaces/player-state.interface';
 
 function generateRandomToken() {
   return (
@@ -58,8 +58,6 @@ export class ApiService {
     const opponentGameState: GameState = await this.gameStateModel
       .findOne({ _id: gameState._ref })
       .exec();
-
-    console.log(opponentGameState.playerState);
 
     const shootResponse: ShootResponse = await this.connection.invoke(
       'Shoot',
