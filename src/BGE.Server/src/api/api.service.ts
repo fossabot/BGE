@@ -35,8 +35,8 @@ export class ApiService {
       await this.acceptGame(gameToken, startRequest.userId);
     } else {
       await this.createGame(
-        startRequest.cols || 8,
-        startRequest.rows || 8,
+        startRequest.cols,
+        startRequest.rows,
         startRequest.userId,
         gameToken,
       );

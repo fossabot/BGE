@@ -10,9 +10,9 @@ export class StartRequest {
 
   @IsOptional()
   @IsNumber()
-  readonly rows?: number;
+  readonly rows?: number = 8;
 
   @IsOptional()
   @IsNumber()
-  readonly cols?: number;
+  readonly cols?: number = 8;
 }
