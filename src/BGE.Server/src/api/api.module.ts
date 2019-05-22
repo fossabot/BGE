@@ -5,10 +5,11 @@ import { DatabaseModule } from '../database/database.module';
 import { ApiController } from './api.controller';
 import { apiProviders } from './api.providers';
 import { ApiService } from './api.service';
+import { GameStateRepository } from './repositories/game-state.repository';
 
 @Module({
   controllers: [ApiController],
-  providers: [ApiService, ...apiProviders],
+  providers: [ApiService, GameStateRepository, ...apiProviders],
   imports: [ConfigModule, AuthModule, DatabaseModule],
 })
 export class ApiModule {}

@@ -1,12 +1,12 @@
 import { HubConnection } from '@aspnet/signalr';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
 import { AuthService } from '../auth/auth.service';
-import { GAME_STATE_MODEL, SIGNALR_CONNECTION } from '../common/constants';
+import { SIGNALR_CONNECTION } from '../common/constants';
 import { ShootResponse } from './dto/shoot-response.dto';
 import { StartRequest } from './dto/start-request.dto';
 import { GameState } from './interfaces/game-state.interface';
 import { PlayerState } from './interfaces/player-state.interface';
+import { GameStateRepository } from './repositories/game-state.repository';
 
 function generateRandomToken() {
   return (
@@ -23,8 +23,7 @@ function generateRandomToken() {
 export class ApiService {
   constructor(
     @Inject(SIGNALR_CONNECTION) private readonly connection: HubConnection,
-    @Inject(GAME_STATE_MODEL)
-    private readonly gameStateModel: Model<GameState>,
+    private readonly gameStateRepository: GameStateRepository,
     private readonly authService: AuthService,
   ) {}
 
@@ -47,51 +46,43 @@ export class ApiService {
   }
 
   public async shoot(userId: string, x: number, y: number) {
-    const gameState: GameState = await this.gameStateModel
-      .findOne({ userId })
-      .exec();
-
+    const gameState: GameState = await this.gameStateRepository.findByUserId(
+      userId,
+    );
     if (!gameState.turn) {
       throw new BadRequestException('Not your move');
     }
 
-    const opponentGameState: GameState = await this.gameStateModel
-      .findOne({ _id: gameState._ref })
-      .exec();
-
+    const opponentGameState: GameState = await this.gameStateRepository.findById(
+      gameState._ref,
+    );
     const shootResponse: ShootResponse = await this.connection.invoke(
       'Shoot',
       { x, y },
       opponentGameState.playerState,
     );
-
-    await this.gameStateModel
-      .updateOne(
-        { _id: opponentGameState._id },
-        { playerState: shootResponse.playerState },
-      )
-      .exec();
+    await this.gameStateRepository.updateOneById(opponentGameState._id, {
+      playerState: shootResponse.playerState,
+    });
 
     if (!shootResponse.hit) {
-      await this.gameStateModel
-        .updateOne({ _id: opponentGameState._id }, { turn: true })
-        .exec();
-      await this.gameStateModel
-        .updateOne({ _id: gameState._id }, { turn: false })
-        .exec();
+      await this.gameStateRepository.updateOneById(opponentGameState._id, {
+        turn: true,
+      });
+      await this.gameStateRepository.updateOneById(gameState._id, {
+        turn: false,
+      });
     }
 
     await this.connection.send('ShootMarker', opponentGameState.userId);
   }
 
   public async state(userId: string) {
-    const playerGameState = await this.gameStateModel
-      .findOne({ userId })
-      .exec();
+    const playerGameState = await this.gameStateRepository.findByUserId(userId);
+    const opponentGameState = await this.gameStateRepository.findById(
+      playerGameState._ref,
+    );
 
-    const opponentGameState = await this.gameStateModel
-      .findOne({ _id: playerGameState._ref })
-      .exec();
     opponentGameState.playerState = await this.connection.invoke(
       'Cleanse',
       opponentGameState.playerState,
@@ -104,29 +95,23 @@ export class ApiService {
   }
 
   private async acceptGame(gameToken: string, userId: string) {
-    const gameState = await this.gameStateModel
-      .findOne({
-        gameToken,
-      })
-      .exec();
+    const gameState = await this.gameStateRepository.findByGameToken(gameToken);
 
     const playerState: PlayerState = await this.connection.invoke('StartGame', {
       rows: gameState.playerState.field.length,
       cols: gameState.playerState.field[0].length,
     });
 
-    const newGameState = await new this.gameStateModel({
+    const newGameState = await this.gameStateRepository.create({
       playerState,
       gameToken,
       userId,
       _ref: gameState._id,
       turn: false,
-    }).save();
-
-    await this.gameStateModel
-      .updateOne({ _id: gameState._id }, { _ref: newGameState._id })
-      .exec();
-
+    });
+    await this.gameStateRepository.updateOneById(gameState._id, {
+      _ref: newGameState._id,
+    });
     await this.connection.send('AcceptMarker', gameState.userId);
   }
 
@@ -141,12 +126,12 @@ export class ApiService {
       cols,
     });
 
-    await new this.gameStateModel({
+    await this.gameStateRepository.create({
       playerState,
       gameToken,
       userId,
       turn: true,
       _ref: null,
-    }).save();
+    });
   }
 }
