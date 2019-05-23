@@ -6,6 +6,6 @@ export const GameStateSchema = new mongoose.Schema({
     field: [[String]],
   },
   userId: String,
-  _ref: mongoose.Schema.Types.ObjectId,
+  opponentGameId: mongoose.Schema.Types.ObjectId,
   turn: Boolean,
 });

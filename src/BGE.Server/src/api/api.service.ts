@@ -54,7 +54,7 @@ export class ApiService {
     }
 
     const opponentGameState: GameState = await this.gameStateRepository.findById(
-      gameState._ref,
+      gameState.opponentGameId,
     );
     const shootResponse: ShootResponse = await this.connection.invoke(
       'Shoot',
@@ -80,7 +80,7 @@ export class ApiService {
   public async state(userId: string) {
     const playerGameState = await this.gameStateRepository.findByUserId(userId);
     const opponentGameState = await this.gameStateRepository.findById(
-      playerGameState._ref,
+      playerGameState.opponentGameId,
     );
 
     opponentGameState.playerState = await this.connection.invoke(
@@ -106,11 +106,11 @@ export class ApiService {
       playerState,
       gameToken,
       userId,
-      _ref: gameState._id,
+      opponentGameId: gameState._id,
       turn: false,
     });
     await this.gameStateRepository.updateOneById(gameState._id, {
-      _ref: newGameState._id,
+      opponentGameId: newGameState._id,
     });
     await this.connection.send('AcceptMarker', gameState.userId);
   }
@@ -131,7 +131,7 @@ export class ApiService {
       gameToken,
       userId,
       turn: true,
-      _ref: null,
+      opponentGameId: null,
     });
   }
 }

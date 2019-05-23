@@ -5,6 +5,6 @@ export interface GameState extends Document {
   playerState: PlayerState;
   gameToken: string;
   userId: string;
-  _ref: string;
+  opponentGameId: string;
   turn: boolean;
 }
