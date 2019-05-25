@@ -75,5 +75,10 @@ namespace BGE.Engine.Test
             cells.Should().Be(rows * cols);
             ships.Should().Be(0);
         }
+
+        public void Win()
+        {
+	        
+        }
     }
 }

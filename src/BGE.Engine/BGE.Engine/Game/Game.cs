@@ -12,7 +12,7 @@ namespace BGE.Engine.Game
 			_random = new Random();
 		}
 		
-		public PlayerState StartGame(int rows = 8, int cols = 8)
+		public PlayerState StartGame(int rows = Constants.DefaultRows, int cols = Constants.DefaultCols)
 		{
 			var playerState = new PlayerState
 			{
@@ -30,7 +30,7 @@ namespace BGE.Engine.Game
 			{
 				for (var j = 0; j < cols; j++)
 				{
-					field[i, j] = ' ';
+					field[i, j] = Constants.FieldEmptySymbol;
 				}
 			}
 			
@@ -60,7 +60,7 @@ namespace BGE.Engine.Game
 				if (isVertical)
 				{
 					var overlap = Enumerable.Range(y, ship)
-						.Select(r => field[x, r] != ' ').Any(r => r);
+						.Select(r => field[x, r] != Constants.FieldEmptySymbol).Any(r => r);
 					
 					if(overlap)
 						continue;
@@ -68,7 +68,7 @@ namespace BGE.Engine.Game
 				else
 				{
 					var overlap = Enumerable.Range(x, ship)
-						.Select(r => field[r, y] != ' ').Any(r => r);
+						.Select(r => field[r, y] != Constants.FieldEmptySymbol).Any(r => r);
 					
 					if(overlap)
 						continue;
@@ -77,9 +77,9 @@ namespace BGE.Engine.Game
 				for (var i = 0; i < ship; i++)
 				{
 					if (isVertical)
-						field[x, y + i] = '0';
+						field[x, y + i] = Constants.FieldShipSymbol;
 					else
-						field[x + i, y] = '0';
+						field[x + i, y] = Constants.FieldShipSymbol;
 				}
 				break;
 			}
@@ -91,9 +91,9 @@ namespace BGE.Engine.Game
 			var y = shootRequest.Y - 1;
 			var shootResponse = new ShootResponse
 			{
-				Hit = playerState.Field[x, y] == '0'
+				Hit = playerState.Field[x, y] == Constants.FieldShipSymbol
 			};
-			playerState.Field[x, y] = 'X';
+			playerState.Field[x, y] = Constants.FieldHitSymbol;
 			shootResponse.PlayerState = playerState;
 			return shootResponse;
 		}
@@ -105,8 +105,8 @@ namespace BGE.Engine.Game
 			{
 				for (var j = 0; j < field.GetUpperBound(1) + 1; j++)
 				{
-					if (field[i, j] == '0')
-						field[i, j] = ' ';
+					if (field[i, j] == Constants.FieldShipSymbol)
+						field[i, j] = Constants.FieldEmptySymbol;
 				}
 			}
 

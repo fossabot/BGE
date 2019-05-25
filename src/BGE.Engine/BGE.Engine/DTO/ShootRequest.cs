@@ -45,7 +45,7 @@ namespace BGE.Engine.DTO
 			if (!IsValid(shootRequest.Y, playerState, 1))
 				result.Errors.Add(new ValidationFailure("Y", "Y value is out of bounds", shootRequest.Y));
 			
-			if(playerState.Field[shootRequest.X - 1, shootRequest.Y - 1] == 'X')
+			if(playerState.Field[shootRequest.X - 1, shootRequest.Y - 1] == Constants.FieldHitSymbol)
 				result.Errors.Add(new ValidationFailure("XY","The cell is already shot"));
 
 			return result;
