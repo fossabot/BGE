@@ -19,7 +19,7 @@ export class GameStateRepository {
   }
 
   public findById(id: string): Promise<GameState> {
-    return this.gameStateModel.findOne({ id }).exec();
+    return this.gameStateModel.findOne({ _id: id }).exec();
   }
 
   public findByGameToken(gameToken: string): Promise<GameState> {
@@ -30,6 +30,6 @@ export class GameStateRepository {
     id: string,
     doc: Partial<GameState>,
   ): Promise<GameState> {
-    return this.gameStateModel.updateOne({ id }, doc).exec();
+    return this.gameStateModel.updateOne({ _id: id }, doc).exec();
   }
 }

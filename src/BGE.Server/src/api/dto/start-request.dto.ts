@@ -5,10 +5,6 @@ export class StartRequest {
   readonly userId: string;
 
   @IsOptional()
-  @IsString()
-  readonly gameToken?: string;
-
-  @IsOptional()
   @IsNumber()
   @Min(6)
   @Max(15)

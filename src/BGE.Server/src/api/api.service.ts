@@ -27,21 +27,37 @@ export class ApiService {
     private readonly authService: AuthService,
   ) {}
 
-  public async start(startRequest: StartRequest) {
-    const gameTokenExists = !!startRequest.gameToken;
-    const gameToken = startRequest.gameToken || generateRandomToken();
-    if (gameTokenExists) {
-      await this.acceptGame(gameToken, startRequest.userId);
-    } else {
-      await this.createGame(
-        startRequest.cols,
-        startRequest.rows,
-        startRequest.userId,
-        gameToken,
-      );
+  public async accept(userId: string, gameToken: string) {
+    const gameState = await this.gameStateRepository.findByGameToken(gameToken);
+    if (!gameState) {
+      throw new BadRequestException('Provided gameToken is invalid');
     }
 
-    const userToken = await this.authService.getToken(startRequest.userId);
+    const playerState: PlayerState = await this.connection.invoke('StartGame', {
+      rows: gameState.playerState.field.length,
+      cols: gameState.playerState.field[0].length,
+    });
+
+    const newGameState = await this.gameStateRepository.create({
+      playerState,
+      gameToken,
+      userId,
+      opponentGameId: gameState._id,
+      turn: false,
+    });
+    await this.gameStateRepository.updateOneById(gameState._id, {
+      opponentGameId: newGameState._id,
+    });
+    await this.connection.send('AcceptMarker', gameState.userId);
+    const userToken = await this.authService.getToken(userId);
+    return { gameToken, userToken };
+  }
+
+  public async start(userId: string, cols: number, rows: number) {
+    const gameToken = generateRandomToken();
+    await this.createGame(cols, rows, userId, gameToken);
+
+    const userToken = await this.authService.getToken(userId);
     return { gameToken, userToken };
   }
 
@@ -92,27 +108,6 @@ export class ApiService {
       playerGameState,
       opponentGameState,
     };
-  }
-
-  private async acceptGame(gameToken: string, userId: string) {
-    const gameState = await this.gameStateRepository.findByGameToken(gameToken);
-
-    const playerState: PlayerState = await this.connection.invoke('StartGame', {
-      rows: gameState.playerState.field.length,
-      cols: gameState.playerState.field[0].length,
-    });
-
-    const newGameState = await this.gameStateRepository.create({
-      playerState,
-      gameToken,
-      userId,
-      opponentGameId: gameState._id,
-      turn: false,
-    });
-    await this.gameStateRepository.updateOneById(gameState._id, {
-      opponentGameId: newGameState._id,
-    });
-    await this.connection.send('AcceptMarker', gameState.userId);
   }
 
   private async createGame(

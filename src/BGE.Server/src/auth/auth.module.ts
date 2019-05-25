@@ -6,7 +6,7 @@ import { AuthService } from './auth.service';
   imports: [
     JwtModule.registerAsync({
       useFactory: () => ({
-        secretOrPrivateKey: 'secret',
+        secret: 'secret',
       }),
     }),
   ],
