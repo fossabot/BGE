@@ -12,7 +12,7 @@ namespace BGE.Engine.Game
 			_random = new Random();
 		}
 		
-		public PlayerState StartGame(int rows = Constants.DefaultRows, int cols = Constants.DefaultCols)
+		public PlayerState StartGame(int rows, int cols)
 		{
 			var playerState = new PlayerState
 			{
@@ -91,9 +91,12 @@ namespace BGE.Engine.Game
 			var y = shootRequest.Y - 1;
 			var shootResponse = new ShootResponse
 			{
-				Hit = playerState.Field[x, y] == Constants.FieldShipSymbol
+				IsHit = playerState.Field[x, y] == Constants.FieldShipSymbol
 			};
-			playerState.Field[x, y] = Constants.FieldHitSymbol;
+			playerState.Field[x, y] =  shootResponse.IsHit 
+				? Constants.FieldShipSinkSymbol 
+				: Constants.FieldHitSymbol;
+			
 			shootResponse.PlayerState = playerState;
 			return shootResponse;
 		}

@@ -51,7 +51,7 @@ namespace BGE.Engine.Test
 		[InlineData(1, 1)]
 		public void Shot(int x, int y)
 		{
-			var playerState = _game.StartGame();
+			var playerState = _game.StartGame(8, 8);
 			var shootResponse = _game.Shoot(new ShootRequest
 			{
 				X = x,
@@ -74,11 +74,6 @@ namespace BGE.Engine.Test
             var (cells, ships) = GetCount(cleansed.Field);
             cells.Should().Be(rows * cols);
             ships.Should().Be(0);
-        }
-
-        public void Win()
-        {
-	        
         }
     }
 }

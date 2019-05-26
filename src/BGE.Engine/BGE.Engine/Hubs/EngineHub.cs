@@ -14,6 +14,12 @@ namespace BGE.Engine.Hubs
 			_game = game;
 		}
 		
+		[HubMethodName("WinnerMarker")]
+		public Task WinnerMarker(string userId)
+		{
+			return Clients.User(userId).SendAsync("Won");
+		}
+		
 		[HubMethodName("ShootMarker")]
 		public Task ShootMarker(string userId)
         {

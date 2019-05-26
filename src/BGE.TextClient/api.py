@@ -1,16 +1,18 @@
 import requests
 from requests.exceptions import HTTPError
+import json
 
 
 class Api:
     def __init__(self, url: str):
         self.url = url
 
-    def start_game(self, user_id, game_token: str = None):
-        data = {"userId": user_id}
-        if game_token is not None:
-            data["gameToken"] = game_token
+    def accept(self, user_id: str, game_token: str):
+        data = {"userId": user_id, "gameToken": game_token}
+        return _send_request(f'{self.url}/accept', data)
 
+    def start(self, user_id: str):
+        data = {"userId": user_id}
         return _send_request(f'{self.url}/start', data)
 
     def shoot(self, x: int, y: int, user_id: str):
@@ -21,15 +23,13 @@ class Api:
         })
 
     def state(self, user_id: str):
-        return _send_request(f'{self.url}/state', {"userId": user_id})
-
-    def reset(self):
-        _send_request(f'{self.url}/reset')
+        data = {"userId": user_id}
+        return _send_request(f'{self.url}/state', data)
 
 
 def _send_request(url: str, data: dict = None):
     try:
-        response = requests.post(url, data)
+        response = requests.post(url, json=data)
         response.raise_for_status()
     except HTTPError as http_err:
         print(f'HTTP error occurred: {http_err}')

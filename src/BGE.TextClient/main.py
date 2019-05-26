@@ -6,18 +6,18 @@ from signalrcore.hub_connection_builder import HubConnectionBuilder
 
 def main(game_token=None):
     game = None
-    token = None
+    user_token = None
     if game_token is None:
         game = Game(2, 'user1')
-        game.reset()
-        token = game.start()
+        user_token, game_token = game.start()
+        print(game_token)
     else:
         game = Game(2, 'user2')
-        token = game.accept(game_token)
+        user_token = game.accept(game_token)
     hub_connection = HubConnectionBuilder().with_url(
         "ws://localhost:5000/engine",
         options={
-            "access_token_factory": lambda: token
+            "access_token_factory": lambda: user_token
         }).build()
 
     hub_connection.start()

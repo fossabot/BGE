@@ -4,7 +4,8 @@ namespace BGE.Engine.DTO
 {
 	public class ShootResponse
 	{
-		public bool Hit { get; set; }
+		public bool IsHit { get; set; }
+		public bool IsWinner { get; set; }
 		public PlayerState PlayerState { get; set; }
 	}
 }

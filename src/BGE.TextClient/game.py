@@ -19,32 +19,32 @@ class Game:
 
     def accept(self, game_token):
         os.system("clear")
-        player = self.api.start_game(self.user_id, game_token)
+        player = self.api.accept(self.user_id, game_token)
         state = self.api.state(self.user_id)
-        self.printer.draw_field(state["player"]["state"]["field"],
-                                state["enemy"]["state"]["field"])
-        return player["token"]
+        self.printer.draw_field(
+            state["playerGameState"]["playerState"]["field"],
+            state["opponentGameState"]["playerState"]["field"])
+        return player["userToken"]
 
     def accepted(self):
         os.system("clear")
         state = self.api.state(self.user_id)
         print("Opponent accepted challenge")
-        self.printer.draw_field(state["player"]["state"]["field"],
-                                state["enemy"]["state"]["field"])
+        self.printer.draw_field(
+            state["playerGameState"]["playerState"]["field"],
+            state["opponentGameState"]["playerState"]["field"])
 
     def start(self):
-        player = self.api.start_game(self.user_id)
-        return player["token"]
-
-    def reset(self):
-        self.api.reset()
+        player = self.api.start(self.user_id)
+        return player["userToken"], player["gameToken"]
 
     def shot(self):
         os.system("clear")
         state = self.api.state(self.user_id)
-        self.printer.draw_field(state["player"]["state"]["field"],
-                                state["enemy"]["state"]["field"])
-        if state["player"]["turn"]:
+        self.printer.draw_field(
+            state["playerGameState"]["playerState"]["field"],
+            state["opponentGameState"]["playerState"]["field"])
+        if state["playerGameState"]["turn"]:
             print("Your turn")
         else:
             print("Enemy turn")
@@ -56,9 +56,10 @@ class Game:
             print(result["message"])
 
         state = self.api.state(self.user_id)
-        self.printer.draw_field(state["player"]["state"]["field"],
-                                state["enemy"]["state"]["field"])
-        if state["player"]["turn"]:
+        self.printer.draw_field(
+            state["playerGameState"]["playerState"]["field"],
+            state["opponentGameState"]["playerState"]["field"])
+        if state["playerGameState"]["turn"]:
             print("Your turn")
         else:
             print("Enemy turn")

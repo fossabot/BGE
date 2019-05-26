@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 using System.Threading.Tasks;
 using BGE.Engine.Game;
 using BGE.Engine.Hubs;
@@ -47,7 +48,7 @@ namespace BGE.Engine
 						// If the request is for our hub...
 						var path = context.HttpContext.Request.Path;
 						if (!string.IsNullOrEmpty(accessToken) &&
-						    (path.StartsWithSegments("/engine")))
+						    path.StartsWithSegments("/engine"))
 						{
 							// Read the token out of the query string
 							context.Token = accessToken;
@@ -61,7 +62,7 @@ namespace BGE.Engine
 			services.AddTransient<IGame, Game.Game>();
 		}
 
-		private SecurityToken SignatureValidator(string token, TokenValidationParameters validationparameters)
+		private static SecurityToken SignatureValidator(string token, TokenValidationParameters validationParameters)
 		{
 			return new JwtSecurityToken(token);
 		}

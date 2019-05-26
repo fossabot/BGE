@@ -81,7 +81,7 @@ export class ApiService {
       playerState: shootResponse.playerState,
     });
 
-    if (!shootResponse.hit) {
+    if (!shootResponse.isHit) {
       await this.gameStateRepository.updateOneById(opponentGameState._id, {
         turn: true,
       });
