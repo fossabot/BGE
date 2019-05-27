@@ -3,7 +3,6 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { SIGNALR_CONNECTION } from '../common/constants';
 import { ShootResponse } from './dto/shoot-response.dto';
-import { StartRequest } from './dto/start-request.dto';
 import { GameState } from './interfaces/game-state.interface';
 import { PlayerState } from './interfaces/player-state.interface';
 import { GameStateRepository } from './repositories/game-state.repository';
